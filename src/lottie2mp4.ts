@@ -50,17 +50,21 @@ export async function lottie2mp4(): Promise<Buffer> {
 			);
 
 			const renderStart = Date.now();
-			for (let i = 0; i < totalFrames; i++) {
+			for (let i = 0; i < totalFrames / 2; i++) {
 				await page.evaluate((frame) => {
 					window.goToFrame(frame);
-				}, i);
+				}, i * 2);
 
 				const framePath = path.join(
 					framesDir,
-					`frame_${String(i).padStart(5, "0")}.png`,
+					`frame_${String(i).padStart(5, "0")}.jpeg`,
 				);
 
-				await page.screenshot({ path: framePath as `${string}.png` });
+				await page.screenshot({
+					path: framePath as `${string}.jpeg`,
+					type: "jpeg",
+					quality: 50,
+				});
 			}
 			console.log(
 				`[lottie2mp4] frame capture: ${Date.now() - renderStart}ms (frames=${totalFrames})`,
@@ -70,9 +74,9 @@ export async function lottie2mp4(): Promise<Buffer> {
 			const args = [
 				"-y",
 				"-framerate",
-				"60",
+				"30",
 				"-i",
-				path.join(framesDir, "frame_%05d.png"),
+				path.join(framesDir, "frame_%05d.jpeg"),
 				"-c:v",
 				"libx264",
 				"-pix_fmt",
